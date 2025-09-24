@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.test.projet.metric.SerializationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-09-24T21:36:57.981Z" hostname="EMMANUELAKA" time="0.009">
+  <properties/>
+  <testcase name="testMetricInnerSerialization()" classname="com.test.projet.metric.SerializationTest" time="0.002"/>
+  <testcase name="testMetricsDtoSerialization()" classname="com.test.projet.metric.SerializationTest" time="0.007"/>
+  <system-out><![CDATA[JSON sérialisé: {"name":"test.metric","value":123.45,"type":"Timer"}
+JSON MetricsDto sérialisé: {"typeCarte":"VISA","metrics":[{"name":"counter.transactions","value":1250.0,"type":"Number"},{"name":"timer.average","value":1.25,"type":"Timer"}]}
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
