@@ -34,6 +34,40 @@ public class MetricsService {
         } catch (Exception e) {
             e.printStackTrace(); // Gérer l'exception de manière appropriée
         }
+
+        // === NOUVELLE FONCTIONNALITÉ: Stocker aussi les métriques agrégées ===
+        // Pour la compatibilité avec les tests fonctionnels réels
+        storeAggregatedMetrics(typeCarte, operationType, executionTime);
+    }
+
+    /**
+     * Stocke les métriques agrégées pour les tests fonctionnels.
+     * Cette méthode maintient des statistiques agrégées par type d'opération.
+     * 
+     * @param typeCarte le type de carte
+     * @param operationType le type d'opération
+     * @param executionTime le temps d'exécution en millisecondes
+     */
+    private void storeAggregatedMetrics(String typeCarte, String operationType, long executionTime) {
+        try {
+            String redisKey = "metrics:" + typeCarte + ":" + operationType;
+            
+            // Récupérer les métriques agrégées existantes
+            MetricsAggregated aggregated = getMetrics(typeCarte, operationType);
+            if (aggregated == null) {
+                aggregated = new MetricsAggregated(typeCarte, operationType);
+            }
+            
+            // Mettre à jour avec les nouvelles données
+            aggregated.updateMetrics(executionTime);
+            
+            // Sauvegarder dans Redis
+            String json = objectMapper.writeValueAsString(aggregated);
+            redisTemplate.opsForValue().set(redisKey, json);
+            
+        } catch (Exception e) {
+            e.printStackTrace(); // Gérer l'exception de manière appropriée
+        }
     }
 
     public MetricsDto getMetricsFromRedis(String typeCarte) {
@@ -56,5 +90,40 @@ public class MetricsService {
             e.printStackTrace(); // Gérer l'exception de manière appropriée
             return false;
         }
+    }
+
+    /**
+     * Récupère les métriques pour un type de carte et un type d'opération spécifiques.
+     * Cette méthode est ajoutée pour la compatibilité avec les tests fonctionnels.
+     * 
+     * @param typeCarte le type de carte
+     * @param operationType le type d'opération (Insert, Update, Delete, etc.)
+     * @return un objet MetricsAggregated contenant les métriques agrégées, ou null si aucune métrique trouvée
+     */
+    public MetricsAggregated getMetrics(String typeCarte, String operationType) {
+        try {
+            // Générer la clé Redis basée sur le type de carte et le type d'opération
+            String redisKey = "metrics:" + typeCarte + ":" + operationType;
+            String json = redisTemplate.opsForValue().get(redisKey);
+            
+            if (json == null || json.trim().isEmpty()) {
+                return null; // Aucune métrique trouvée
+            }
+            
+            return objectMapper.readValue(json, MetricsAggregated.class);
+        } catch (Exception e) {
+            e.printStackTrace(); // Gérer l'exception de manière appropriée
+            return null;
+        }
+    }
+
+    /**
+     * Récupère toutes les métriques pour un type de carte donné.
+     * 
+     * @param typeCarte le type de carte
+     * @return un objet MetricsDto contenant toutes les métriques, ou null si aucune trouvée
+     */
+    public MetricsDto getAllMetrics(String typeCarte) {
+        return getMetricsFromRedis(typeCarte);
     }
 }
