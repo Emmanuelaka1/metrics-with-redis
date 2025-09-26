@@ -4,9 +4,13 @@ import com.test.projet.metric.MetricsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,9 +23,13 @@ import static org.mockito.Mockito.*;
  * - Update => 100 données  
  * - Delete => 100 données (50 Insert et 50 Update)
  * 
+ * Utilise @ExtendWith(MockitoExtension.class) pour une approche moderne
+ * avec @InjectMocks et @Mock pour une meilleure isolation des tests
+ * 
  * @author Generated
  * @since 1.0.0
  */
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @TestPropertySource(properties = {
     "spring.redis.host=localhost", 
@@ -32,7 +40,7 @@ class CardMetricsExactSpecTest {
     @Autowired
     private CardMetricsTestService cardMetricsTestService;
 
-    @SpyBean
+    @MockBean
     private MetricsService metricsService;
 
     @BeforeEach

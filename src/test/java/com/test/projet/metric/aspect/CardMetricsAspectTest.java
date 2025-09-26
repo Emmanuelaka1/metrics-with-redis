@@ -3,9 +3,11 @@ package com.test.projet.metric.aspect;
 import com.test.projet.metric.MetricsService;
 import com.test.projet.service.CardService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -13,10 +15,13 @@ import static org.mockito.Mockito.*;
 
 /**
  * Tests pour l'aspect CardMetricsAspect
+ * Mise à jour pour Spring Boot 3.5.4 : @SpyBean remplacé par @MockBean
+ * Utilise @ExtendWith(MockitoExtension.class) pour une approche moderne
  * 
  * @author Generated
  * @since 1.0.0
  */
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @TestPropertySource(properties = {
     "spring.redis.host=localhost",
@@ -28,7 +33,7 @@ class CardMetricsAspectTest {
     @Autowired
     private CardService cardService;
 
-    @SpyBean
+    @MockBean
     private MetricsService metricsService;
 
     @Test
