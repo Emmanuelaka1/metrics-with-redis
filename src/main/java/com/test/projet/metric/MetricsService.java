@@ -1,10 +1,17 @@
 package com.test.projet.metric;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 public class MetricsService {
@@ -51,20 +58,20 @@ public class MetricsService {
     private void storeAggregatedMetrics(String typeCarte, String operationType, long executionTime) {
         try {
             String redisKey = "metrics:" + typeCarte + ":" + operationType;
-            
+
             // Récupérer les métriques agrégées existantes
             MetricsAggregated aggregated = getMetrics(typeCarte, operationType);
             if (aggregated == null) {
                 aggregated = new MetricsAggregated(typeCarte, operationType);
             }
-            
+
             // Mettre à jour avec les nouvelles données
             aggregated.updateMetrics(executionTime);
-            
+
             // Sauvegarder dans Redis
             String json = objectMapper.writeValueAsString(aggregated);
             redisTemplate.opsForValue().set(redisKey, json);
-            
+
         } catch (Exception e) {
             e.printStackTrace(); // Gérer l'exception de manière appropriée
         }
@@ -105,11 +112,11 @@ public class MetricsService {
             // Générer la clé Redis basée sur le type de carte et le type d'opération
             String redisKey = "metrics:" + typeCarte + ":" + operationType;
             String json = redisTemplate.opsForValue().get(redisKey);
-            
+
             if (json == null || json.trim().isEmpty()) {
                 return null; // Aucune métrique trouvée
             }
-            
+
             return objectMapper.readValue(json, MetricsAggregated.class);
         } catch (Exception e) {
             e.printStackTrace(); // Gérer l'exception de manière appropriée
@@ -125,5 +132,22 @@ public class MetricsService {
      */
     public MetricsDto getAllMetrics(String typeCarte) {
         return getMetricsFromRedis(typeCarte);
+    }
+
+    // methode recupere toutes les cles redis
+    public Map<String, MetricsDto> getAllRedisKeys() {
+        try {
+            Set<String> keys = redisTemplate.keys("metrics:*");
+            if (keys == null || keys.isEmpty())
+                return Collections.emptyMap();
+
+            // filter not null values
+            return keys.stream().filter(key -> getMetricsFromRedis(key.replace("metrics:", "")) != null)
+                            .collect(Collectors.toMap(key -> key.replace("metrics:", ""), key -> getMetricsFromRedis(key.replace("metrics:", ""))));
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Gérer l'exception de manière appropriée
+            return null;
+        }
     }
 }
